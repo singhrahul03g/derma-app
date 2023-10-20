@@ -6,7 +6,7 @@ const _ = require("lodash");
 const errorHandler = require("../helpers/errorHandler");
 const { db, sequelize } = require("../config/dbConnection");
 const { generateToken, refreshToken } = require("../helpers/jwtToken");
-const { mailDetails, sendMail } = require("../helpers/emailTransporter");
+const { mailDetails, sendMail, transporter } = require("../helpers/emailTransporter");
 const {
   findAndCreateSessionWithID,
   updateSessionWithID,
@@ -34,29 +34,44 @@ async function getHtmlContent(templateName, replaceData) {
 
 // Registration of admin
 const register = async (req, res, next) => {
-  console.log("===========================================");
+  console.log("===========================================register   ");
+
   // console.log(Admin);
+
   const { name, email, password } = req.body;
 
   const salt = await bcrypt.genSalt(parseInt(saltRounds));
+
   const admin = {
     name: name,
     email: email,
     password: await bcrypt.hash(password, salt),
   };
+
+  const role = await Roles.findOne({
+    where: { name: "superAdmin" }, // Specify the search criteria
+  });
+
+  console.log("role", role.createdAt);
+
   await Admin.create(admin)
-    .then((admin) => {
+    .then(async (admin) => {
+      await admin.update({
+        roleId: role.id,
+      });
       const { id, name, email } = admin.toJSON();
-      // console.log({id, name, email});
+
       const token = generateToken({ id, name, email });
       if (token.length !== 0) {
+
+        console.log("INSIDE TOKEN IF STATEMENT");
         const emailTransporter = transporter();
 
         const mailData = mailDetails(
-          "Testing the mail",
+          "userName from",
           `Welcome ${name}`,
-          "abc123@yopmail.com",
-          "Welcome to new world"
+          "wwwwqq@yopmail.com",
+          "helloo yes your here"
         );
 
         const sendMail = async (emailTransporter, mailDetails) => {
@@ -65,6 +80,7 @@ const register = async (req, res, next) => {
             console.log("Email has been sent.....");
           } catch (error) {
             console.log(error);
+            console.log("INSIDE CATCH SENDMAIL STATEMENT");
           }
         };
         sendMail(emailTransporter, mailData);
@@ -75,6 +91,7 @@ const register = async (req, res, next) => {
       });
     })
     .catch((err) => {
+      console.log(err)
       if (!err.errors) {
         return next(errorHandler(500, "Server internal error. Please try after some time."));
       } else {
@@ -108,8 +125,9 @@ const login = async (req, res, next) => {
     const dbData = admin.dataValues;
     bcrypt.compare(password, dbData.password, async (error, response) => {
       if (response) {
-        console.log(dbData);
+
         const { id, uniqueId, name, email, role } = dbData;
+        console.log(dbData, "dbdat6a");
         const roleName = role.dataValues.name;
 
         await findAndCreateSessionWithID(id, roleName);
@@ -171,7 +189,7 @@ const forgotPassword = async (req, res, next) => {
     admin.update({
       token: token,
     });
-    console.log(token);
+    // console.log(token);
     const url = process.env.ADMIN_FRONTEND_URL;
     let activationURL = path.join(url, `resetPassword?secret=${token}`);
 
@@ -368,8 +386,8 @@ const addPractitioner = async (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log("Error");
-      console.log(err);
+      // console.log("Error");
+      // console.log(err);
       if (!err.errors) {
         return next(errorHandler(500, "Server internal error. Please try after some time."));
       } else {
@@ -388,7 +406,7 @@ const practitionersList = async (req, res, next) => {
     let searchBy = {};
     let columnName = sortName ? sortName : "createdAt";
     let order = sort ? sort : "desc";
-    if(searchText !== undefined && searchText !== ""){
+    if (searchText !== undefined && searchText !== "") {
       searchBy[Op.or] = [
         {
           firstName: {
@@ -417,12 +435,12 @@ const practitionersList = async (req, res, next) => {
         },
       ]
     }
-    if(status !== undefined && status !== ""){
+    if (status !== undefined && status !== "") {
       searchBy.status = {
         [Op.eq]: status
       }
     }
-    if(createdAt !== undefined && createdAt !== ""){
+    if (createdAt !== undefined && createdAt !== "") {
       searchBy.createdAt = {
         [Op.lte]: new Date(createdAt)
       }
@@ -430,7 +448,7 @@ const practitionersList = async (req, res, next) => {
     searchBy.adminId = {
       [Op.eq]: id
     }
-    const {count, rows} = await User.findAndCountAll({
+    const { count, rows } = await User.findAndCountAll({
       where: searchBy,
       include: [Roles, Admin],
       order: [[`${columnName}`, `${order}`]],
@@ -479,7 +497,7 @@ const practitionersList = async (req, res, next) => {
       msg: "Practitioners list.",
     });
   } catch (err) {
-    console.log(err);
+    // console.log(err);
     if (!err.errors) {
       return next(errorHandler(500, "Server internal error. Please try after some time."));
     } else {
@@ -500,7 +518,7 @@ const deletePractitioner = async (req, res, next) => {
         uniqueId
       }
     });
-    if(users){
+    if (users) {
       const userUpdate = await users.update({
         uniqueId: `${users.id} is deleted`
       });
@@ -508,7 +526,7 @@ const deletePractitioner = async (req, res, next) => {
       return res.status(200).json({
         msg: "Practitioners deleted succesfully.",
       });
-    }else{
+    } else {
       return res.status(404).json({
         msg: "Not found",
       });
@@ -620,9 +638,8 @@ const changeStatus = async (req, res, next) => {
       return res
         .status(200)
         .json({
-          message: `Practitioner is ${
-            status === 0 ? "deactivated" : "actived"
-          }.`,
+          message: `Practitioner is ${status === 0 ? "deactivated" : "actived"
+            }.`,
         });
     }
     return res.status(404).json({ message: `Practitioner is not found.` });
@@ -634,7 +651,7 @@ const changeStatus = async (req, res, next) => {
 };
 
 module.exports = {
-  //   register,
+  register,
   login,
   forgotPassword,
   changePassword,

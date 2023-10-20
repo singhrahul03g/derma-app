@@ -135,6 +135,6 @@ module.exports = (Sequelize, sequelize, DataTypes) => {
     }
   );
   // `sequelize.define` also returns the model
-  console.log(User === sequelize.models.user); // true
+  // console.log(User === sequelize.models.user); // true
   return User;
 };

@@ -1,6 +1,6 @@
+
 const { Sequelize, DataTypes } = require("sequelize");
 const bcrypt = require("bcrypt");
-
 const saltRounds = process.env.BCRYPT_SALTROUNDS;
 
 const {
@@ -39,10 +39,8 @@ db.user = require("../models/user.model")(Sequelize, sequelize, DataTypes);
 
 db.admin.hasMany(db.user); // Define the foreign key relationship
 db.user.belongsTo(db.admin);
-
 db.role.hasMany(db.admin);
 db.admin.belongsTo(db.role);
-
 
 db.sequelize.sync({ alter: true });
 console.log("db inside dbConnection");

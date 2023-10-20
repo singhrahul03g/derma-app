@@ -71,7 +71,7 @@ module.exports = (Sequelize, sequelize, DataTypes) => {
         paranoid: true
       }
     );
-    console.log(Category === sequelize.models.category); // true
+    // console.log(Category === sequelize.models.category); // true
     return Category;
   };
   

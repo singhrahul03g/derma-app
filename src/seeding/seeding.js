@@ -29,8 +29,8 @@ const roleseeding  = async (req, res) => {
         // Add more roles here
       ])
         .then(async (roles) => {
-          console.log("roles");
-          console.log(roles);
+          // console.log("roles");
+          // console.log(roles);
           const salt = await bcrypt.genSalt(parseInt(saltRounds));
           let adminDetails = {
             name: "Testing Admin",

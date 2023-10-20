@@ -57,7 +57,7 @@ const login = async (req, res, next) => {
     const dbData = user.dataValues;
     bcrypt.compare(password, dbData.password, async (error, response) => {
       if (response) {
-        console.log(dbData);
+        // console.log(dbData);
         let {
           id,
           uniqueId,
@@ -132,7 +132,7 @@ const forgotPassword = async (req, res, next) => {
     ],
     where: { email },
   });
-  console.log(user);
+  // console.log(user);
   if (!user) {
     return res.status(200).json({ msg: "Email sent successfully." });
   } else {
@@ -841,7 +841,7 @@ const addPatient = async (req, res, next) => {
       msg: "Added patient succesfully.",
     });
   } catch (err) {
-    console.log(err)
+    // console.log(err)
     if (!err.errors) {
       return next(
         errorHandler(500, "Server internal error. Please try after some time.")
@@ -946,7 +946,7 @@ const patientsList = async (req, res, next) => {
       });
     })
     .catch((err) => {
-      console.log(err);
+      // console.log(err);
       if (!err.errors) {
         return next(
           errorHandler(500, "Server internal error. Please try after some time.")

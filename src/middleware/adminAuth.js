@@ -1,5 +1,4 @@
 const JWT = require("jsonwebtoken");
-
 const errorHandler = require("../helpers/errorHandler");
 const { findToken } = require("../helpers/adminSession");
 
@@ -15,7 +14,6 @@ const auth = async (req, res, next) => {
   }
   try {
     const decoded = JWT.verify(token, process.env.JWT_SECRET_KEY);
-    
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
     if(type === undefined){
@@ -50,7 +48,7 @@ const refreshAuth = async (req, res, next) => {
 
     if(type === undefined){
       let sessionToken = await findToken(decoded.id, token, decoded.roleName);
-      console.log("token ==> ", token, sessionToken)
+      // console.log("token ==> ", token, sessionToken)
       if (sessionToken === null) {
         return next(errorHandler(401, "Invalid credentails"));
       }

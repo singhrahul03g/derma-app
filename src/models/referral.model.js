@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
       }
     );
     // `sequelize.define` also returns the model
-    console.log(Referral === sequelize.models.referral); // true
+    // console.log(Referral === sequelize.models.referral); // true
     return Referral;
   };
   

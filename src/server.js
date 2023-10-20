@@ -1,3 +1,4 @@
+
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
@@ -7,6 +8,7 @@ const createErr = require("http-errors");
 const session = require("express-session");
 require("dotenv").config(path.join(__dirname, '/.env'));
 
+
 const { sequelize, db } = require("./config/dbConnection");
 const errorHandler = require('./helpers/errorHandler');
 const auth = require('./middleware/adminAuth');
@@ -14,6 +16,7 @@ const auth = require('./middleware/adminAuth');
 if(!fs.existsSync('./src/loggers')){
   fs.mkdirSync('./src/loggers')
 }
+
 const accessLogStream = fs.createWriteStream(
   path.join(__dirname, `/loggers/logs.log`),
   { flags: "a" }
@@ -47,17 +50,19 @@ app.use(
     { stream: accessLogStream }
   )
 );
+
 let isDatabaseAuthenticated = false;
+
 app.use(async (req, res, next) => {
   if (!isDatabaseAuthenticated) {
     try {
       await sequelize.authenticate();
-      console.log("Connection to the database has been established successfully.");
+      // console.log("Connection to the database has been established successfully.");
       isDatabaseAuthenticated = true; // Mark the database as authenticated
       db;
       next(); // Continue with the API request handling
     } catch (error) {
-      console.error("Unable to connect to the database:", error);
+      // console.error("Unable to connect to the database:", error);
       next(errorHandler(500, 'Database connection error'));
     }
   } else {
@@ -80,7 +85,7 @@ app.use("/v1/seeding", seeding);
 // Testing route
 app.use("/", (req, res, next) => {
   if (isDatabaseAuthenticated === true) {
-    console.log("Testing routes with simple /");
+    // console.log("Testing routes with simple /");
     next(createErr.NotFound());
   }
 });

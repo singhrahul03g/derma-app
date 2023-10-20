@@ -2,7 +2,7 @@ const router = require('express').Router();
 const adminController = require('../controllers/admin.controller');
 const { auth, refreshAuth } = require('../middleware/adminAuth');
 
-// router.post('/register', adminController.register);
+router.post('/register', adminController.register);
 router.post('/login', adminController.login);
 router.post('/forgotPassword', adminController.forgotPassword);
 router.post('/resetPassword', auth, adminController.resetPassword);

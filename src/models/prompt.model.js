@@ -60,6 +60,6 @@ module.exports = (Sequelize, sequelize, DataTypes) => {
   );
 
   // `sequelize.define` also returns the model
-  console.log(Prompt === sequelize.models.prompt); // true
+  // console.log(Prompt === sequelize.models.prompt); // true
   return Prompt;
 };

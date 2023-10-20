@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
     );
   
     // `sequelize.define` also returns the model
-    console.log(Email_Templates === sequelize.models.emailTemplates); // true
+    // console.log(Email_Templates === sequelize.models.emailTemplates); // true
     return Email_Templates;
   };
   

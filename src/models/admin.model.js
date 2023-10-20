@@ -67,7 +67,7 @@ module.exports = (Sequelize, sequelize, DataTypes) => {
     );
   
     // `sequelize.define` also returns the model
-    console.log(Admin === sequelize.models.admin); // true
+    // console.log(Admin === sequelize.models.admin); // true
     return Admin;
   };
   

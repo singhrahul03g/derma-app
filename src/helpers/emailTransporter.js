@@ -12,6 +12,8 @@ const transporter = () => {
     },
   });
 };
+
+ 
 // console.log(transporter);
 const mailDetails = ( fromName, subject, mailto, html) => {
   return {
@@ -31,12 +33,13 @@ const sendMail = async (mailDetails) => {
         await transporter().sendMail(mailDetails);
         console.log("Email has been sent.....")
     } catch (error) {
-        console.log(error)
+        console.log(error,"ty")
     }
 }
 // sendMail(transporter, mailDetails);
 
 module.exports = {
+  transporter,
   mailDetails,
   sendMail
 };
