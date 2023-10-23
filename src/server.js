@@ -8,7 +8,6 @@ const createErr = require("http-errors");
 const session = require("express-session");
 require("dotenv").config(path.join(__dirname, '/.env'));
 
-
 const { sequelize, db } = require("./config/dbConnection");
 const errorHandler = require('./helpers/errorHandler');
 const auth = require('./middleware/adminAuth');
