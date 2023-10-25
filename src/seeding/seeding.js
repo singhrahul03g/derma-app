@@ -12,8 +12,9 @@ const saltRounds = process.env.BCRYPT_SALTROUNDS;
 const roleseeding1 = async (req, res) => {
   await Role.create([
     { name: "superAdmin" },
-    { name: "admin" },
-    { name: "practitioner" }
+    { name: "Pharmacy" },
+    { name: "Doctor" },
+    { name: "Patient" },
   ]);
 }
 
@@ -24,8 +25,9 @@ const roleseeding  = async (req, res) => {
     if (!role) {
       Role.bulkCreate([
         { name: "superAdmin" },
-        { name: "admin" },
-        { name: "practitioner" },
+    { name: "Pharmacy" },
+    { name: "Doctor" },
+    { name: "Patient" },
         // Add more roles here
       ])
         .then(async (roles) => {

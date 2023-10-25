@@ -65,7 +65,6 @@ const register = async (req, res, next) => {
 
       const token = generateToken({ id, name, email });
 
-
       if (token.length !== 0) {
 
         console.log("INSIDE TOKEN IF STATEMENT");
