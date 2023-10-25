@@ -1,3 +1,4 @@
+
 const bcrypt = require("bcrypt");
 const path = require("path");
 const { Op } = require("sequelize");
@@ -59,32 +60,41 @@ const register = async (req, res, next) => {
       await admin.update({
         roleId: role.id,
       });
+
       const { id, name, email } = admin.toJSON();
 
       const token = generateToken({ id, name, email });
+
+
       if (token.length !== 0) {
 
         console.log("INSIDE TOKEN IF STATEMENT");
-        const emailTransporter = transporter();
+        const emailTransporter =  transporter();
 
         const mailData = mailDetails(
-          "userName from",
+          "userName",
           `Welcome ${name}`,
           "wwwwqq@yopmail.com",
           "helloo yes your here"
         );
 
-        const sendMail = async (emailTransporter, mailDetails) => {
+        const sendMail = async ( mailDetails) => {
           try {
-            await emailTransporter.sendMail(mailDetails);
+            await transporter().sendMail(mailDetails);
             console.log("Email has been sent.....");
+
           } catch (error) {
             console.log(error);
             console.log("INSIDE CATCH SENDMAIL STATEMENT");
           }
         };
-        sendMail(emailTransporter, mailData);
+
+        sendMail(mailData);
+
       }
+
+
+
       return res.json({
         status: 200,
         msg: "Token generated succesfully.",

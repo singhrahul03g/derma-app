@@ -24,7 +24,7 @@ const mailDetails = ( fromName, subject, mailto, html) => {
     // to: ["abc123@yopmail.com"],
     to: mailto,
     subject: subject,
-    html: html,
+    html: html,  
   };
 };
 
@@ -36,6 +36,7 @@ const sendMail = async (mailDetails) => {
         console.log(error,"ty")
     }
 }
+
 // sendMail(transporter, mailDetails);
 
 module.exports = {
