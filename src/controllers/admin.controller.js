@@ -105,69 +105,6 @@ const register = async (req, res, next) => {
     });
 };
 
-// fetch list of admins
-
-const getAllAdmins = async (req, res, next) => {
-
-  const admins = await Admin.findAll();
-  res.json({ result: admins })
-
-}
-
-
-const editAdmin = async (req, res, next) => {
-
-  const uniqueId = req.params.uniqueId
-  const adminDetails = req.body
-
-  try {
-    const admin = await Admin.findOne({ where: { uniqueId: uniqueId } });
-
-    if (admin === null) {
-      console.log('Not found!');
-    } else {
-      console.log(admin instanceof Admin); // true
-      console.log(admin, "admin");
-    }
-
-    admin.set({
-      ...admin,
-      ...adminDetails
-    });
-
-
-    await admin.save();
-
-    res.send({
-      "result": 'admin updated successfully'
-    })
-  } catch (err) {
-
-    console.log(err, "err");
-    res.send({
-      "error": err
-    })
-
-  }
-}
-
-const deleteAdmin = async (req, res, next) => {
-
-  const uniqueId = req.params.uniqueId
-  console.log(uniqueId,"uniques")
-
-  await Admin.destroy({
-    where: {
-     "uniqueId": uniqueId
-    },
-  });
-
-  res.send({
-    result:"deleted admin"
-  })
-
-}
-
 
 // Login of admin
 const login = async (req, res, next) => {
@@ -718,20 +655,144 @@ const changeStatus = async (req, res, next) => {
   }
 };
 
+//For admins
+const getAdmins = async (req, res) => {
+    try {
+        const admins = await Admin.findAll();
+        res.status(200).json({ result: admins });
+    } catch (e) {
+        console.log(e);
+        res.status(500).send(e);
+    }
+}
+
+const addAdmin = async (req, res, next) => {
+    try {
+        const { name, email, password } = req.body;
+        const salt = await bcrypt.genSalt(parseInt(saltRounds));
+    
+        const admin = {
+            name: name,
+            email: email,
+            password: await bcrypt.hash(password, salt)
+        };
+    
+        const role = await Roles.findOne({
+            where: { name: "superAdmin" }, // Specify the search criteria
+        });
+  
+        await Admin.create(admin)
+        .then(async (admin) => {
+            await admin.update({ roleId: role.id });
+            const { id, name, email } = admin.toJSON();
+            const token = generateToken({ id, name, email });
+    
+            if (token.length !== 0) {
+                console.log("INSIDE TOKEN IF STATEMENT");
+                const emailTransporter = transporter();
+                const mailData = mailDetails(
+                    "userName",
+                    `Welcome ${name}`,
+                    "wwwwqq@yopmail.com",
+                    "helloo yes your here"
+                );
+    
+                const sendMail = async (mailDetails) => {
+                    try {
+                        await transporter().sendMail(mailDetails);
+                        console.log("Email has been sent.....");
+        
+                    } catch (error) {
+                        console.log(error);
+                        console.log("INSIDE CATCH SENDMAIL STATEMENT");
+                    }
+                };
+            sendMail(mailData);
+            }
+            res.status(200).json({ result: admin });
+        })
+        .catch((err) => {
+            console.log(err)
+            if (!err.errors) {
+                return next(errorHandler(500, "Server internal error. Please try after some time."));
+            } else {
+                return err.errors.forEach((err) => { next(errorHandler(400, err.message)) });
+            }
+        });
+    } catch (e) {
+        console.log(e);
+        res.status(500).send(e);
+    }
+};
+
+const getAdminById = async (req, res) => {
+    try {
+        const { uniqueId } = req.params;
+        const admin = await Admin.findOne({ where: { uniqueId } });
+        if (!admin) return res.status(400).send({ message: 'This id not found' });
+        
+        res.status(200).json(admin);
+    } catch (e) {
+        console.log(e);
+        res.status(500).send(e);
+    }
+};
+
+const updateAdmin = async (req, res, next) => {
+
+    try {
+        const { uniqueId } = req.params;
+        const { name, email, password } = req.body;
+
+        const updatedAdmin = await Admin.findOne({ where: { uniqueId } });
+        if (!updatedAdmin) return res.status(400).send({ message: 'This user id not found' });
+      
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updatedAdmin.password = hashedPassword;
+        }
+        if (name) updatedAdmin.name = name;
+        if (email) updatedAdmin.email = email;
+
+        const saveAdmin = await updatedAdmin.save();
+        res.status(200).json(saveAdmin);
+    } catch (e) {
+        console.log(e);
+        res.status(500).send(e);
+    }
+};
+
+const deleteAdmin = async (req, res, next) => {
+    try {
+        const { uniqueId } = req.params;
+        const deleteAdmin = await Admin.findOne({ where: { uniqueId } });
+        if (!deleteAdmin) return res.status(400).send({ message: 'This Id not found' });
+
+        await deleteAdmin.update({ uniqueId: `${deleteAdmin.id} is deleted`});
+        await deleteAdmin.destroy();
+        res.status(200).json({ deleteAdmin, message: "Admin deleted succesfully." });
+    } catch (e) {
+        console.log(e);
+        res.status(500).send(e);
+    }
+}
+
 module.exports = {
-  register,
-  getAllAdmins,
-  login,
-  forgotPassword,
-  changePassword,
-  resetPassword,
-  addPractitioner,
-  practitionersList,
-  deletePractitioner,
-  logout,
-  refreshTokenAPI,
-  editPractitioner,
-  changeStatus,
-  editAdmin,
-  deleteAdmin
+    register,
+    login,
+    forgotPassword,
+    changePassword,
+    resetPassword,
+    addPractitioner,
+    practitionersList,
+    deletePractitioner,
+    logout,
+    refreshTokenAPI,
+    editPractitioner,
+    changeStatus,
+    getAdmins,
+    addAdmin,
+    getAdminById,
+    updateAdmin,
+    deleteAdmin
 };
