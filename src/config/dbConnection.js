@@ -31,6 +31,8 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
+
+db.doctor = require("../models/doctor.model")(Sequelize, sequelize, DataTypes);
 db.role = require("../models/role.model")(sequelize, DataTypes);
 db.session = require("../models/session.model")(Sequelize, sequelize, DataTypes);
 db.emailTemplate = require("../models/emailTemplate.model")(sequelize, DataTypes);

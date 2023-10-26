@@ -12,7 +12,7 @@ const {
   updateSessionWithID,
 } = require("../helpers/adminSession");
 
-const Admin = db.admin;
+const Doctor = db.doctor;
 const User = db.user;
 const Roles = db.role;
 const saltRounds = process.env.BCRYPT_SALTROUNDS;
@@ -108,8 +108,10 @@ const register = async (req, res, next) => {
 // fetch list of admins
 
 const getAllAdmins = async (req, res, next) => {
+
   const admins = await Admin.findAll();
   res.json({ result: admins })
+
 }
 
 
@@ -158,7 +160,6 @@ const deleteAdmin = async (req, res, next) => {
   console.log(admin,"gbxhjbh")
 
   try {
-
     await admin.destroy()
 
     res.send({

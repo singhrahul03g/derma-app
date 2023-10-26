@@ -73,6 +73,11 @@ app.use(async (req, res, next) => {
 const adminRoutes = require("./routes/admin.routes");
 app.use("/v1/admin", adminRoutes);
 
+// Routes for admin
+const doctorRoutes = require("./routes/doctor.routes");
+app.use("/v1/doctor", doctorRoutes);
+
+
 // Routes for user
 const user = require("./routes/user.routes");
 app.use("/v1/user", user);

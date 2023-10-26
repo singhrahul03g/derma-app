@@ -1,7 +1,7 @@
+
 const fs = require("fs");
 const bcrypt = require("bcrypt");
 const path = require("path");
-
 const { db } = require("../config/dbConnection");
 
 const Admin = db.admin;

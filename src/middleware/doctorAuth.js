@@ -14,8 +14,8 @@ const auth = async (req, res, next) => {
   // Get the JWT token from the request headers, cookies, or wherever you have stored it
 
    const adminsession = await findToken(session[0].id,session[0].accessToken,session[0].type)
-  // console.log(adminsession,"adj========")
-     
+  //  console.log(adminsession,"adj========")
+   
   let header = req.headers;
 
   let token = adminsession.dataValues.accessToken;
@@ -26,14 +26,10 @@ const auth = async (req, res, next) => {
     return next(errorHandler(401, "Invalid credentails"));
   }
 
-  console.log(token,"token========")
-
   try {
-
+    
     const decoded = JWT.verify(token, process.env.JWT_SECRET_KEY);
     const currentTimestamp = Math.floor(Date.now() / 1000);
-
-    console.log(decoded,"decoded========")
 
     if(type === undefined){
       let sessionToken = await findToken(decoded.id, token, decoded.roleName);
@@ -43,7 +39,6 @@ const auth = async (req, res, next) => {
     }
 
     if (decoded.exp > currentTimestamp) {
-     
       req.user = decoded;
       return next();
     }
