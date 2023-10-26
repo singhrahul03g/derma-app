@@ -64,7 +64,7 @@ const register = async (req, res, next) => {
       if (token.length !== 0) {
 
         console.log("INSIDE TOKEN IF STATEMENT");
-        const emailTransporter =  transporter();
+        const emailTransporter = transporter();
 
         const mailData = mailDetails(
           "userName",
@@ -73,7 +73,7 @@ const register = async (req, res, next) => {
           "helloo yes your here"
         );
 
-        const sendMail = async ( mailDetails) => {
+        const sendMail = async (mailDetails) => {
           try {
             await transporter().sendMail(mailDetails);
             console.log("Email has been sent.....");
@@ -110,10 +110,56 @@ const register = async (req, res, next) => {
 const getAllAdmins = async (req, res, next) => {
 
   const admins = await Admin.findAll();
-  // console.log("All admins:", JSON.stringify(admins, null, 2));
-  res.json({result:admins})
-  
+  res.json({ result: admins })
+
 }
+
+
+const editAdmin = async (req, res, next) => {
+
+  const uniqueId = req.params.uniqueId
+  const adminDetails = req.body
+
+  try{const admin = await Admin.findOne({ where: { uniqueId: uniqueId } });
+
+  if (admin === null) {
+    console.log('Not found!');
+  } else {
+    console.log(admin instanceof Admin); // true
+    console.log(admin, "admin"); 
+  }
+
+  admin.set({
+    ...admin,
+    adminDetails
+  });
+
+  
+  await admin.save();
+
+  res.send({
+    "result":'admin updated successfully'
+  })
+}catch(err){
+
+  console.log(err, "err"); 
+  res.send({
+    "error":err
+  })
+
+}
+}
+
+const deleteAdmin = async (req, res, next) => {
+
+  await User.destroy({
+    where: {
+      firstName: "Jane"
+    },
+  });
+
+}
+
 
 // Login of admin
 const login = async (req, res, next) => {
@@ -677,5 +723,7 @@ module.exports = {
   logout,
   refreshTokenAPI,
   editPractitioner,
-  changeStatus
+  changeStatus,
+  editAdmin,
+  deleteAdmin
 };

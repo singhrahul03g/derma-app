@@ -7,8 +7,6 @@ const Session = db.session
 
 const auth = async (req, res, next) => {
 
-
-  
   const session = await Session.findAll();
 
   // Get the JWT token from the request headers, cookies, or wherever you have stored it
@@ -25,7 +23,9 @@ const auth = async (req, res, next) => {
     // Token is missing, user is not authenticated
     return next(errorHandler(401, "Invalid credentails"));
   }
+
   try {
+    
     const decoded = JWT.verify(token, process.env.JWT_SECRET_KEY);
     const currentTimestamp = Math.floor(Date.now() / 1000);
 
