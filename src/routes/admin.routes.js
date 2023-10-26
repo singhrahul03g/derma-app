@@ -23,7 +23,7 @@ router.get('/refreshToken', refreshAuth, adminController.refreshTokenAPI);
 router.get('/getAllAdmins', auth, adminController.getAllAdmins);
 router.get('/adminDetails/:id', auth, adminController.getAllAdmins);
 router.put('/editAdmin/:uniqueId', auth, adminController.editAdmin);
-router.delete('/deleteAdmin/:id',auth, adminController.deleteAdmin) ;
+router.delete('/deleteAdmin/:uniqueId',auth, adminController.deleteAdmin) ;
 
 
 module.exports = router;

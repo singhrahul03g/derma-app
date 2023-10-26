@@ -120,43 +120,51 @@ const editAdmin = async (req, res, next) => {
   const uniqueId = req.params.uniqueId
   const adminDetails = req.body
 
-  try{const admin = await Admin.findOne({ where: { uniqueId: uniqueId } });
+  try {
+    const admin = await Admin.findOne({ where: { uniqueId: uniqueId } });
 
-  if (admin === null) {
-    console.log('Not found!');
-  } else {
-    console.log(admin instanceof Admin); // true
-    console.log(admin, "admin"); 
+    if (admin === null) {
+      console.log('Not found!');
+    } else {
+      console.log(admin instanceof Admin); // true
+      console.log(admin, "admin");
+    }
+
+    admin.set({
+      ...admin,
+      ...adminDetails
+    });
+
+
+    await admin.save();
+
+    res.send({
+      "result": 'admin updated successfully'
+    })
+  } catch (err) {
+
+    console.log(err, "err");
+    res.send({
+      "error": err
+    })
+
   }
-
-  admin.set({
-    ...admin,
-    adminDetails
-  });
-
-  
-  await admin.save();
-
-  res.send({
-    "result":'admin updated successfully'
-  })
-}catch(err){
-
-  console.log(err, "err"); 
-  res.send({
-    "error":err
-  })
-
-}
 }
 
 const deleteAdmin = async (req, res, next) => {
 
-  await User.destroy({
+  const uniqueId = req.params.uniqueId
+  console.log(uniqueId,"uniques")
+
+  await Admin.destroy({
     where: {
-      firstName: "Jane"
+     "uniqueId": uniqueId
     },
   });
+
+  res.send({
+    result:"deleted admin"
+  })
 
 }
 
