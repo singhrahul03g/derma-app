@@ -22,11 +22,12 @@ const auth = async (req, res, next) => {
   let type = adminsession.dataValues.type;
   
   if (!token) {
+    
     // Token is missing, user is not authenticated
     return next(errorHandler(401, "Invalid credentails"));
   }
 
-  console.log(token,"token========")
+  console.log(token,type,"token========")
 
   try {
 
