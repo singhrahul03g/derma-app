@@ -17,12 +17,13 @@ router.post('/changeStatus/:uniqueId', auth, adminController.changeStatus);
 router.get('/logout', auth, adminController.logout);
 router.get('/refreshToken', refreshAuth, adminController.refreshTokenAPI);
 
-// For Admins
-router.get('/admin-list', auth, adminController.getAdmins);
-router.post('/admin-add', auth, adminController.addAdmin);
-router.get('/admin-get/:uniqueId', auth, adminController.getAdminById);
-router.put('/admin-update/:uniqueId', auth, adminController.updateAdmin);
-router.delete('/admin-delete/:uniqueId',auth, adminController.deleteAdmin);
+// list admins, edit admin and delete admin routes
+// edit paths and add unique id
+
+router.get('/getAllAdmins', auth, adminController.getAllAdmins);
+router.get('/adminDetails/:id', auth, adminController.getAllAdmins);
+router.put('/editAdmin/:uniqueId', auth, adminController.editAdmin);
+router.delete('/deleteAdmin/:uniqueId',auth, adminController.deleteAdmin) ;
 
 
 module.exports = router;
