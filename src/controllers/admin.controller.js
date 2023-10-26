@@ -3,7 +3,6 @@ const bcrypt = require("bcrypt");
 const path = require("path");
 const { Op } = require("sequelize");
 const _ = require("lodash");
-
 const errorHandler = require("../helpers/errorHandler");
 const { db, sequelize } = require("../config/dbConnection");
 const { generateToken, refreshToken } = require("../helpers/jwtToken");
@@ -36,9 +35,6 @@ async function getHtmlContent(templateName, replaceData) {
 // Registration of admin
 const register = async (req, res, next) => {
   console.log("===========================================register   ");
-
-  // console.log(Admin);
-
   const { name, email, password } = req.body;
 
   const salt = await bcrypt.genSalt(parseInt(saltRounds));
@@ -53,7 +49,7 @@ const register = async (req, res, next) => {
     where: { name: "superAdmin" }, // Specify the search criteria
   });
 
-  console.log("role", role.createdAt);
+  console.log("role", role);
 
   await Admin.create(admin)
     .then(async (admin) => {
@@ -91,12 +87,10 @@ const register = async (req, res, next) => {
         sendMail(mailData);
 
       }
-
-
-
       return res.json({
         status: 200,
         msg: "Token generated succesfully.",
+        token
       });
     })
     .catch((err) => {
@@ -111,8 +105,19 @@ const register = async (req, res, next) => {
     });
 };
 
+// fetch list of admins
+
+const getAllAdmins = async (req, res, next) => {
+
+  const admins = await Admin.findAll();
+  // console.log("All admins:", JSON.stringify(admins, null, 2));
+  res.json({result:admins})
+  
+}
+
 // Login of admin
 const login = async (req, res, next) => {
+
   const { email, password } = req.body;
 
   if (typeof email === "undefined" || typeof password === "undefined") {
@@ -150,6 +155,7 @@ const login = async (req, res, next) => {
           roleName,
         });
         await updateSessionWithID(id, token, refreshJWTToken, roleName);
+        // localStorage.setItem("token",token)
 
         return res.status(200).json({
           token: token,
@@ -216,7 +222,6 @@ const forgotPassword = async (req, res, next) => {
       html
     );
     sendMail(mailData);
-
     return res.status(200).json({ msg: "Email sent successfully." });
   }
 };
@@ -661,6 +666,7 @@ const changeStatus = async (req, res, next) => {
 
 module.exports = {
   register,
+  getAllAdmins,
   login,
   forgotPassword,
   changePassword,

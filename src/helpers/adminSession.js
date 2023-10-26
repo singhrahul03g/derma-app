@@ -9,23 +9,31 @@ const Admin = db.admin;
  * with id and type of admin and token inside request
  */
 const findToken = async (id, token, type) => {
-  // console.log("id, token, type =====> ", id, token, type);
+
+  // console.log("in findTokjenid, token, type =====> ", id, token, type);
+
   try {
     const adminData = await Admin.findOne({
       where: {
         id
       },
     });
+
     // console.log("adminData =====> ", adminData);
+
     if (adminData) {
+
+      // console.log("inside if block adminData =====> ",);
+
       const adminSessionData = await Session.findOne({
         where: {
-          sessionUserId: id,
+          id: id,
           type: type,
           [Op.or]: [{ accessToken: token }, { refreshToken: token }],
         },
       });
-      // console.log("adminData =====> ", adminSessionData);
+      // console.log("admin session Data =====> ", adminSessionData);
+      
       return adminSessionData;
     } else {
       return null;

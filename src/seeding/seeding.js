@@ -18,16 +18,16 @@ const roleseeding1 = async (req, res) => {
   ]);
 }
 
-const roleseeding  = async (req, res) => {
+const roleseeding = async (req, res) => {
   Role.findOne({
     where: { name: "superAdmin" }, // Specify the search criteria
   }).then((role) => {
     if (!role) {
       Role.bulkCreate([
         { name: "superAdmin" },
-    { name: "Pharmacy" },
-    { name: "Doctor" },
-    { name: "Patient" },
+        { name: "Pharmacy" },
+        { name: "Doctor" },
+        { name: "Patient" },
         // Add more roles here
       ])
         .then(async (roles) => {

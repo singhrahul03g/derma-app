@@ -23,7 +23,9 @@ router.post('/promptsList', auth, userController.promptsList);
 router.post('/changePromptStatus/:uniqueId', auth, userController.changePromptStatus);
 router.post('/editPrompt/:uniqueId', auth, userController.editPrompt);
 router.post('/deletePrompt', auth, userController.deletePrompt);
+
 // Patient routes
+
 router.post('/addPatient', auth, userController.addPatient);
 router.post('/patientsList', auth, userController.patientsList);
 router.post('/editPatient/:uniqueId', auth, userController.editPatient);

@@ -42,7 +42,7 @@ db.user.belongsTo(db.admin);
 db.role.hasMany(db.admin);
 db.admin.belongsTo(db.role);
 
-db.sequelize.sync({ force: true });
-console.log("db inside dbConnection");
+db.sequelize.sync({ alter: true });
+// console.log("db inside dbConnection");
 
 module.exports = { sequelize, db };

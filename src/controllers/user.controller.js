@@ -2,7 +2,6 @@ const bcrypt = require("bcrypt");
 const path = require("path");
 const { Op } = require("sequelize");
 const _ = require("lodash");
-
 const errorHandler = require("../helpers/errorHandler");
 const { db, sequelize } = require("../config/dbConnection");
 const { generateToken, refreshToken } = require("../helpers/jwtToken");
@@ -221,6 +220,7 @@ const changePassword = async (req, res, next) => {
     return res.status(400).json({ msg: "Error updating password." }); // Change password(400).json({ msg: "user not found." });
   } else {
     const dbData = user.dataValues;
+    
     bcrypt.compare(oldPassword, dbData.password, async (error, response) => {
       if (response) {
         const roleName = dbData.role.dataValues.name;
@@ -856,6 +856,7 @@ const addPatient = async (req, res, next) => {
 
 // Patient List
 const patientsList = async (req, res, next) => {
+  
   const { searchText, dob, sort, limit, page } = req.body;
   let { id } = req.user;
   let searchBy = {};

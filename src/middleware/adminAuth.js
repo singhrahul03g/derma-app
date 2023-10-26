@@ -1,12 +1,25 @@
 const JWT = require("jsonwebtoken");
 const errorHandler = require("../helpers/errorHandler");
 const { findToken } = require("../helpers/adminSession");
+const { db } = require("../config/dbConnection");
+const Session = db.session
+
 
 const auth = async (req, res, next) => {
+
+
+  
+  const session = await Session.findAll();
+
   // Get the JWT token from the request headers, cookies, or wherever you have stored it
+
+   const adminsession = await findToken(session[0].id,session[0].accessToken,session[0].type)
+  //  console.log(adminsession,"adj========")
+   
   let header = req.headers;
-  let token = header.authorization;
-  let type = header.type;
+
+  let token = adminsession.dataValues.accessToken;
+  let type = adminsession.dataValues.type;
   
   if (!token) {
     // Token is missing, user is not authenticated
