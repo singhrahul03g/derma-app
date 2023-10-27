@@ -109,8 +109,27 @@ const register = async (req, res, next) => {
 
 const getAllAdmins = async (req, res, next) => {
 
+  
   const admins = await Admin.findAll();
   res.json({ result: admins })
+
+}
+
+const getAdminDetails = async (req, res, next) => {
+
+  const uniqueId = req.params.uniqueId
+try{
+  const admin = await Admin.findOne({
+    where:{
+      uniqueId
+    }
+  })
+
+  res.json({ result: admin })
+
+}catch(err){
+  console.log(err,"err")
+}
 
 }
 
@@ -733,5 +752,6 @@ module.exports = {
   editPractitioner,
   changeStatus,
   editAdmin,
-  deleteAdmin
+  deleteAdmin,
+  getAdminDetails
 };

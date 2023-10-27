@@ -39,7 +39,7 @@ const findToken = async (id, token, type) => {
       return null;
     }
   } catch (error) {
-    // console.log(error)
+    console.log(" error catch block find token")
     return null;
   }
 };
@@ -48,6 +48,7 @@ const findToken = async (id, token, type) => {
  * Find session with id in session table and also create
  * new if not exits with id and type of admin
  */
+
 const findAndCreateSessionWithID = async (id, type) => {
   try {
     const adminData = await Admin.findOne({

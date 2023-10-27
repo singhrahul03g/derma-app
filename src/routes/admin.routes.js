@@ -4,7 +4,7 @@ const router = require('express').Router();
 const adminController = require('../controllers/admin.controller');
 const { auth, refreshAuth } = require('../middleware/adminAuth');
 
-router.post('/register', adminController.register);
+router.post('/admin-add', adminController.register);
 router.post('/login', adminController.login);
 router.post('/forgotPassword', adminController.forgotPassword);
 router.post('/resetPassword', auth, adminController.resetPassword);
@@ -20,10 +20,10 @@ router.get('/refreshToken', refreshAuth, adminController.refreshTokenAPI);
 // list admins, edit admin and delete admin routes
 // edit paths and add unique id
 
-router.get('/getAllAdmins', auth, adminController.getAllAdmins);
-router.get('/adminDetails/:id', auth, adminController.getAllAdmins);
-router.put('/editAdmin/:uniqueId', auth, adminController.editAdmin);
-router.delete('/deleteAdmin/:uniqueId',auth, adminController.deleteAdmin) ;
+router.get('/admin-list', auth, adminController.getAllAdmins);
+router.get('/admin-get/:uniqueId', auth, adminController.getAdminDetails);
+router.put('/admin-update/:uniqueId', auth, adminController.editAdmin);
+router.delete('/admin-delete/:uniqueId',auth, adminController.deleteAdmin) ;
 
 
 module.exports = router;

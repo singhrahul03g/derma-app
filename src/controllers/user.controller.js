@@ -1,3 +1,5 @@
+
+
 const bcrypt = require("bcrypt");
 const path = require("path");
 const { Op } = require("sequelize");
@@ -67,6 +69,7 @@ const login = async (req, res, next) => {
           phoneNumber,
           address,
         } = dbData;
+        
         let userName = `${firstName}${!lastName ? "" : " " + lastName}`;
         let roleName = user.dataValues.role.dataValues.name;
 
