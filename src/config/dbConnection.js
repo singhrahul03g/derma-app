@@ -39,10 +39,15 @@ db.emailTemplate = require("../models/emailTemplate.model")(sequelize, DataTypes
 db.admin = require("../models/admin.model")(Sequelize, sequelize, DataTypes);
 db.user = require("../models/user.model")(Sequelize, sequelize, DataTypes);
 
-db.admin.hasMany(db.user); // Define the foreign key relationship
+db.admin.hasMany(db.user);    // Define the foreign key relationship
 db.user.belongsTo(db.admin);
 db.role.hasMany(db.admin);
 db.admin.belongsTo(db.role);
+
+db.doctor.hasMany(db.user);    // Define the foreign key relationship
+db.user.belongsTo(db.doctor);
+db.role.hasMany(db.doctor);
+db.doctor.belongsTo(db.role);
 
 db.sequelize.sync({ alter: true });
 // console.log("db inside dbConnection");

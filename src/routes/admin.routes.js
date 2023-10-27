@@ -25,5 +25,4 @@ router.get('/admin-get/:uniqueId', auth, adminController.getAdminDetails);
 router.put('/admin-update/:uniqueId', auth, adminController.editAdmin);
 router.delete('/admin-delete/:uniqueId',auth, adminController.deleteAdmin) ;
 
-
 module.exports = router;

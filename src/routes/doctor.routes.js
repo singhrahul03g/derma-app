@@ -1,17 +1,17 @@
-// admin routes
+
+// doctor routes
 
 const router = require('express').Router();
 const doctorController = require('../controllers/doctor.controller');
 const { auth, refreshAuth } = require('../middleware/doctorAuth');
 
+router.post('/doctor-add', doctorController.register);
+router.post('/login', doctorController.login);
 
-// list admins, edit admin and delete admin routes
-// edit paths and add unique id
-
-router.get('/getAllAdmins', auth, doctorController.getAllAdmins);
-router.get('/adminDetails/:id', auth, doctorController.getAllAdmins);
-router.put('/editAdmin/:uniqueId', auth, doctorController.editAdmin);
-router.delete('/deleteAdmin/:uniqueId',auth, doctorController.deleteAdmin) ;
+router.get('/doctor-list', auth, doctorController.getAllDoctors);
+router.get('/doctor-get/:uniqueId', auth, doctorController.getDoctorDetails);
+router.put('/doctor-update/:uniqueId', auth, doctorController.editDoctor);
+router.delete('/doctor-delete/:uniqueId',auth, doctorController.deleteDoctor) ;
 
 
 module.exports = router;

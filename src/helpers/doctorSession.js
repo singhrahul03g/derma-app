@@ -1,39 +1,33 @@
 const { Op } = require("sequelize");
 const { db } = require("../config/dbConnection");
 const Session = db.session;
-const Admin = db.admin;
+const Doctor = db.doctor;
 
 /**
  * Find any token inside session table in database
- * with id and type of admin and token inside request
+ * with id and type of doctor and token inside request
  */
+
 const findToken = async (id, token, type) => {
-
-  // console.log("in findTokjenid, token, type =====> ", id, token, type);
-
   try {
-    const adminData = await Admin.findOne({
+    const doctorData = await Doctor.findOne({
       where: {
         id
       },
     });
 
-    // console.log("adminData =====> ", adminData);
-
-    if (adminData) {
-
-      // console.log("inside if block adminData =====> ",);
-
-      const adminSessionData = await Session.findOne({
+  
+    if (doctorData) {
+   
+      const doctorSessionData = await Session.findOne({
         where: {
           id: id,
           type: type,
           [Op.or]: [{ accessToken: token }, { refreshToken: token }],
         },
       });
-      // console.log("admin session Data =====> ", adminSessionData);
-      
-      return adminSessionData;
+    
+      return doctorSessionData;
     } else {
       return null;
     }
@@ -43,20 +37,21 @@ const findToken = async (id, token, type) => {
   }
 };
 
-/**
+/*
+
  * Find session with id in session table and also create
- * new if not exits with id and type of admin
+ * new if not exits with id and type of doctor
  */
 
 const findAndCreateSessionWithID = async (id, type) => {
   try {
-    const adminData = await Admin.findOne({
-      where: {
+    const doctorData = await Doctor.findOne({
+      where: {  
         id
       },
     });
-    if (adminData) {
-      const adminFindorCreateSessionData = await Session.findOrCreate({
+    if (doctorData) {
+      const doctorFindorCreateSessionData = await Session.findOrCreate({
         where: {
           sessionUserId: id,
           type: type,
@@ -66,7 +61,7 @@ const findAndCreateSessionWithID = async (id, type) => {
           refreshToken: null,
         },
       });
-      return adminFindorCreateSessionData;
+      return doctorFindorCreateSessionData;
     } else {
       return null;
     }
@@ -82,13 +77,13 @@ const findAndCreateSessionWithID = async (id, type) => {
  */
 const updateSessionWithID = async (id, token, refreshJWTToken, type) => {
   try {
-    const adminData = await Admin.findOne({
+    const doctorData = await Doctor.findOne({
       where: {
         id
       },
     });
-    if (adminData) {
-      const adminUpdatedSessionData = await Session.update(
+    if (doctorData) {
+      const doctorUpdatedSessionData = await Session.update(
         {
           accessToken: token,
           refreshToken: refreshJWTToken,
@@ -101,7 +96,7 @@ const updateSessionWithID = async (id, token, refreshJWTToken, type) => {
           },
         }
       );
-      return adminUpdatedSessionData;
+      return doctorUpdatedSessionData;
     } else {
       return null;
     }

@@ -10,7 +10,7 @@ const { mailDetails, sendMail, transporter } = require("../helpers/emailTranspor
 const {
   findAndCreateSessionWithID,
   updateSessionWithID,
-} = require("../helpers/adminSession");
+} = require("../helpers/doctorSession");
 
 const Doctor = db.doctor;
 const User = db.user;
@@ -32,32 +32,32 @@ async function getHtmlContent(templateName, replaceData) {
     });
 }
 
-// Registration of admin
+// Registration of doctor
 const register = async (req, res, next) => {
   console.log("===========================================register   ");
   const { name, email, password } = req.body;
 
   const salt = await bcrypt.genSalt(parseInt(saltRounds));
 
-  const admin = {
+  const doctor = {
     name: name,
     email: email,
     password: await bcrypt.hash(password, salt),
   };
 
   const role = await Roles.findOne({
-    where: { name: "superAdmin" }, // Specify the search criteria
+    where: { name: "Doctor" }, // Specify the search criteria
   });
 
   console.log("role", role);
 
-  await Admin.create(admin)
-    .then(async (admin) => {
-      await admin.update({
+  await Doctor.create(doctor)
+    .then(async (doctor) => {
+      await doctor.update({
         roleId: role.id,
       });
 
-      const { id, name, email } = admin.toJSON();
+      const { id, name, email } = doctor.toJSON();
 
       const token = generateToken({ id, name, email });
 
@@ -105,41 +105,60 @@ const register = async (req, res, next) => {
     });
 };
 
-// fetch list of admins
+// fetch list of doctors
 
-const getAllAdmins = async (req, res, next) => {
+const getAllDoctors = async (req, res, next) => {
 
-  const admins = await Admin.findAll();
-  res.json({ result: admins })
+  const doctors = await Doctor.findAll();
+  res.json({ result: doctors })
+
+}
+
+const getDoctorDetails = async (req, res, next) => {
+
+  
+  const uniqueId = req.params.uniqueId
+try{
+  const doctor = await Doctor.findOne({
+    where:{
+      uniqueId
+    }
+  })
+
+  res.json({ result: doctor })
+
+}catch(err){
+  console.log(err,"err")
+}
 
 }
 
 
-const editAdmin = async (req, res, next) => {
+const editDoctor = async (req, res, next) => {
 
   const uniqueId = req.params.uniqueId
-  const adminDetails = req.body
+  const doctorDetails = req.body
 
   try {
-    const admin = await Admin.findOne({ where: { uniqueId } });
+    const doctor = await Doctor.findOne({ where: { uniqueId } });
 
-    if (admin === null) {
+    if (doctor === null) {
       console.log('Not found!');
     } else {
-      console.log(admin instanceof Admin); // true
-      console.log(admin, "admin");
+      console.log(doctor instanceof Doctor); // true
+      console.log(doctor, "doctor");
     }
 
-    admin.set({
-      ...admin,
-      ...adminDetails
+    doctor.set({
+      ...doctor,
+      ...doctorDetails
     });
 
 
-    await admin.save();
+    await doctor.save();
 
     res.send({
-      "result": 'admin updated successfully'
+      "result": 'doctor updated successfully'
     })
   } catch (err) {
 
@@ -151,19 +170,19 @@ const editAdmin = async (req, res, next) => {
   }
 }
 
-const deleteAdmin = async (req, res, next) => {
+const deleteDoctor = async (req, res, next) => {
 
   const uniqueId = req.params.uniqueId
   console.log(uniqueId,"uniqueid")
  
-  const admin = await Admin.findOne({ where: { uniqueId } });
-  console.log(admin,"gbxhjbh")
+  const doctor = await Doctor.findOne({ where: { uniqueId } });
+  console.log(doctor,"gbxhjbh")
 
   try {
-    await admin.destroy()
+    await doctor.destroy()
 
     res.send({
-      result: "deleted admin"
+      result: "deleted doctor"
     })
   } catch (err) {
     console.log(err, "err")
@@ -171,7 +190,7 @@ const deleteAdmin = async (req, res, next) => {
 }
 
 
-// Login of admin
+// Login of doctor
 const login = async (req, res, next) => {
 
   const { email, password } = req.body;
@@ -180,7 +199,7 @@ const login = async (req, res, next) => {
     return next(errorHandler(400, "Invalid request"));
   }
   // Authenticate the user (you can use bcrypt or other methods for password hashing)
-  const admin = await Admin.findOne({
+  const doctor = await Doctor.findOne({
     include: [
       {
         model: Roles,
@@ -189,10 +208,10 @@ const login = async (req, res, next) => {
     where: { email },
   });
 
-  if (!admin) {
+  if (!doctor) {
     return next(errorHandler(401, "Invalid credentials"));
   } else {
-    const dbData = admin.dataValues;
+    const dbData = doctor.dataValues;
     bcrypt.compare(password, dbData.password, async (error, response) => {
       if (response) {
 
@@ -236,7 +255,7 @@ const forgotPassword = async (req, res, next) => {
   if (typeof email === "undefined") {
     return next(errorHandler(400, "Invalid request"));
   }
-  const admin = await Admin.findOne({
+  const doctor = await Doctor.findOne({
     include: [
       {
         model: db.role,
@@ -245,19 +264,19 @@ const forgotPassword = async (req, res, next) => {
     ],
     where: { email },
   });
-  // console.log(admin);
-  if (!admin) {
+  // console.log(doctor);
+  if (!doctor) {
     return res.status(200).json({ msg: "Email sent successfully." });
   } else {
-    const { id, uniqueId, name, email } = admin;
+    const { id, uniqueId, name, email } = doctor;
 
-    const roleName = admin.dataValues.role.dataValues.name;
+    const roleName = doctor.dataValues.role.dataValues.name;
 
     await findAndCreateSessionWithID(id, roleName);
     await updateSessionWithID(id, null, null, roleName);
 
     const token = generateToken({ id, uniqueId, name, email });
-    admin.update({
+    doctor.update({
       token: token,
     });
     // console.log(token);
@@ -297,7 +316,7 @@ const changePassword = async (req, res, next) => {
     return next(errorHandler(400, "Invalid request"));
   }
 
-  let admin = await Admin.findOne({
+  let doctor = await Doctor.findOne({
     include: [
       {
         model: Roles,
@@ -308,16 +327,16 @@ const changePassword = async (req, res, next) => {
       token: null,
     },
   });
-  // console.log(admin);
-  if (!admin) {
-    return res.status(400).json({ msg: "Error updating password." }); // Change password(400).json({ msg: "Admin not found." });
+  // console.log(doctor);
+  if (!doctor) {
+    return res.status(400).json({ msg: "Error updating password." }); // Change password(400).json({ msg: "Doctor not found." });
   } else {
-    const dbData = admin.dataValues;
+    const dbData = doctor.dataValues;
     bcrypt.compare(oldPassword, dbData.password, async (error, response) => {
       if (response) {
         const roleName = dbData.role.dataValues.name;
         // let newPassword = newPassword;
-        Admin.prototype.updatePassword = async function (newPassword) {
+        Doctor.prototype.updatePassword = async function (newPassword) {
           const salt = await bcrypt.genSalt(parseInt(saltRounds));
           const hashedPassword = await bcrypt.hash(newPassword, salt);
           this.password = hashedPassword;
@@ -327,7 +346,7 @@ const changePassword = async (req, res, next) => {
         await findAndCreateSessionWithID(dbData.id, roleName);
         await updateSessionWithID(dbData.id, null, null, roleName);
 
-        admin.updatePassword(newPassword);
+        doctor.updatePassword(newPassword);
         return res.status(200).json({ msg: "Password updated successfully" });
       } else {
         return next(errorHandler(401, "Invalid credentials"));
@@ -338,7 +357,7 @@ const changePassword = async (req, res, next) => {
 
 /**
  * Reset password function firstly check the expire time
- * and then check the admin database for having token or null
+ * and then check the doctor database for having token or null
  */
 const resetPassword = async (req, res, next) => {
   const { password } = req.body;
@@ -348,7 +367,7 @@ const resetPassword = async (req, res, next) => {
     return next(errorHandler(400, "Invalid request"));
   }
 
-  let admin = await Admin.findOne({
+  let doctor = await Doctor.findOne({
     where: {
       email,
       token: {
@@ -356,12 +375,12 @@ const resetPassword = async (req, res, next) => {
       },
     },
   });
-  // console.log(admin);
-  if (!admin) {
-    return res.status(400).json({ msg: "Error updating password." }); // Change password(400).json({ msg: "Admin not found." });
+  // console.log(doctor);
+  if (!doctor) {
+    return res.status(400).json({ msg: "Error updating password." }); // Change password(400).json({ msg: "Doctor not found." });
   } else {
     let newPassword = password;
-    Admin.prototype.updatePassword = async function (newPassword) {
+    Doctor.prototype.updatePassword = async function (newPassword) {
       const salt = await bcrypt.genSalt(parseInt(saltRounds));
       const hashedPassword = await bcrypt.hash(newPassword, salt);
       this.password = hashedPassword;
@@ -369,7 +388,7 @@ const resetPassword = async (req, res, next) => {
       await this.save();
     };
 
-    admin.updatePassword(newPassword);
+    doctor.updatePassword(newPassword);
     return res.status(200).json({ msg: "Password updated successfully" });
   }
 };
@@ -378,7 +397,7 @@ const resetPassword = async (req, res, next) => {
 const addPractitioner = async (req, res, next) => {
   let { firstName, lastName, phoneNumber, email, countryCode, address } =
     req.body;
-  let adminData = req.user;
+  let doctorData = req.user;
   let fullName = `${firstName}${!lastName ? "" : " " + lastName}`;
   let practitioner = {
     firstName: firstName,
@@ -405,10 +424,10 @@ const addPractitioner = async (req, res, next) => {
         .then((role) => {
           user.setRole(role);
         });
-      await db.admin
-        .findOne({ where: { email: adminData.email } })
-        .then((admin) => {
-          user.setAdmin(admin);
+      await db.doctor
+        .findOne({ where: { email: doctorData.email } })
+        .then((doctor) => {
+          user.setDoctor(doctor);
         });
 
       let token = generateToken({
@@ -436,14 +455,14 @@ const addPractitioner = async (req, res, next) => {
       let activationURL = path.join(url, `setPassword?token=${token}`);
       let replaceData = {
         PRACTITIONER_NAME: userName,
-        NAME: adminData.name,
+        NAME: doctorData.name,
         URL: activationURL,
       };
 
       html = await getHtmlContent("welcome_template", replaceData);
 
       let mailData = mailDetails(
-        adminData.name,
+        doctorData.name,
         `Welcome ${userName}`,
         email,
         html
@@ -515,12 +534,12 @@ const practitionersList = async (req, res, next) => {
         [Op.lte]: new Date(createdAt)
       }
     }
-    searchBy.adminId = {
+    searchBy.doctorId = {
       [Op.eq]: id
     }
     const { count, rows } = await User.findAndCountAll({
       where: searchBy,
-      include: [Roles, Admin],
+      include: [Roles, Doctor],
       order: [[`${columnName}`, `${order}`]],
       offset: page ? (page - 1) * limit : 0,
       limit: limit ? limit : 10,
@@ -540,7 +559,7 @@ const practitionersList = async (req, res, next) => {
         address,
         status,
       } = practitioner.dataValues;
-      const adminName = practitioner.admin.dataValues.name;
+      const doctorName = practitioner.doctor.dataValues.name;
 
       let userName = `${firstName}${!lastName ? "" : " " + lastName}`;
       practitionerArr["firstName"] = firstName;
@@ -551,7 +570,7 @@ const practitionersList = async (req, res, next) => {
       practitionerArr["countryCode"] = countryCode;
       practitionerArr["phoneNumber"] = phoneNumber;
       practitionerArr["address"] = address;
-      practitionerArr["adminName"] = adminName;
+      practitionerArr["doctorName"] = doctorName;
       practitionerArr["status"] = status;
       if (password === null) {
         practitionerArr["isActive"] = false;
@@ -616,8 +635,8 @@ const deletePractitioner = async (req, res, next) => {
  * Logout will null user's session token and refresh token in session table
  */
 const logout = async (req, res) => {
-  let adminData = req.user;
-  const { id, roleName } = adminData;
+  let doctorData = req.user;
+  const { id, roleName } = doctorData;
   await updateSessionWithID(id, null, null, roleName);
   return res.json({
     status: 200,
@@ -722,7 +741,7 @@ const changeStatus = async (req, res, next) => {
 
 module.exports = {
   register,
-  getAllAdmins,
+  getAllDoctors,
   login,
   forgotPassword,
   changePassword,
@@ -734,6 +753,7 @@ module.exports = {
   refreshTokenAPI,
   editPractitioner,
   changeStatus,
-  editAdmin,
-  deleteAdmin
+  editDoctor,
+  deleteDoctor,
+  getDoctorDetails
 };
