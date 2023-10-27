@@ -31,7 +31,7 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-
+db.patient = require("../models/patients.model")(Sequelize, sequelize, DataTypes);
 db.doctor = require("../models/doctor.model")(Sequelize, sequelize, DataTypes);
 db.role = require("../models/role.model")(sequelize, DataTypes);
 db.session = require("../models/session.model")(Sequelize, sequelize, DataTypes);
@@ -48,6 +48,11 @@ db.doctor.hasMany(db.user);    // Define the foreign key relationship
 db.user.belongsTo(db.doctor);
 db.role.hasMany(db.doctor);
 db.doctor.belongsTo(db.role);
+
+db.patient.hasMany(db.user);    // Define the foreign key relationship
+db.user.belongsTo(db.patient);
+db.role.hasMany(db.patient);
+db.patient.belongsTo(db.role);
 
 db.sequelize.sync({ alter: true });
 // console.log("db inside dbConnection");

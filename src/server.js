@@ -78,6 +78,11 @@ const doctorRoutes = require("./routes/doctor.routes");
 app.use("/v1/doctor", doctorRoutes);
 
 
+// Routes for admin
+const patientRoutes = require("./routes/patient.routes");
+app.use("/v1/patient", patientRoutes);
+
+
 // Routes for user
 const user = require("./routes/user.routes");
 app.use("/v1/user", user);
