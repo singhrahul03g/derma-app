@@ -33,7 +33,7 @@ async function getHtmlContent(templateName, replaceData) {
 }
 
 // Registration of admin
-const register = async (req, res, next) => {
+const adminAdd = async (req, res, next) => {
   console.log("===========================================register   ");
   const { name, email, password } = req.body;
 
@@ -109,9 +109,28 @@ const register = async (req, res, next) => {
 
 const getAllAdmins = async (req, res, next) => {
 
-  
-  const admins = await Admin.findAll();
-  res.json({ result: admins })
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 3;
+    const offset = (page - 1) * limit;
+
+    const { count, rows: admins } = await Admin.findAndCountAll({
+        limit,
+        offset,
+    });
+
+    const pageData = {
+        total_record: count,
+        per_page: limit,
+        current_page: page,
+        total_pages: Math.ceil(count / limit),
+    };
+
+    res.status(200).json({ result: admins, pageData });
+} catch (e) {
+    console.error(e);
+    res.status(500).send(e);
+}
 
 }
 
@@ -172,18 +191,31 @@ const editAdmin = async (req, res, next) => {
 
 const deleteAdmin = async (req, res, next) => {
 
-  const uniqueId = req.params.uniqueId
-  console.log(uniqueId,"uniques")
+  // const uniqueId = req.params.uniqueId
+  // console.log(uniqueId,"uniques")
 
-  await Admin.destroy({
-    where: {
-     "uniqueId": uniqueId
-    },
-  });
+  // await Admin.destroy({
+  //   where: {
+  //    "uniqueId": uniqueId
+  //   },
+  // });
 
-  res.send({
-    result:"deleted admin"
-  })
+  // res.send({
+  //   result:"deleted admin"
+  // })
+
+  try {
+    const { uniqueId } = req.params;
+    const deleteAdmin = await Admin.findOne({ where: { uniqueId } });
+    if (!deleteAdmin) return res.status(400).send({ message: 'This Id not found' });
+
+    await deleteAdmin.destroy();
+
+    res.status(200).json({ deleteAdmin, message: "Admin deleted succesfully." });
+} catch (e) {
+    console.log(e);
+    res.status(500).send(e);
+}
 
 }
 
@@ -248,11 +280,15 @@ const login = async (req, res, next) => {
  * Forgot password function firstly check the expire time
  * and can be access from outside api
  */
+
 const forgotPassword = async (req, res, next) => {
+
   const { email } = req.body;
+
   if (typeof email === "undefined") {
     return next(errorHandler(400, "Invalid request"));
   }
+
   const admin = await Admin.findOne({
     include: [
       {
@@ -262,6 +298,7 @@ const forgotPassword = async (req, res, next) => {
     ],
     where: { email },
   });
+  
   // console.log(admin);
   if (!admin) {
     return res.status(200).json({ msg: "Email sent successfully." });
@@ -471,6 +508,7 @@ const addPractitioner = async (req, res, next) => {
         status: 200,
         msg: "Practitioner added succesfully.",
       });
+      
     })
     .catch((err) => {
       // console.log("Error");
@@ -542,6 +580,7 @@ const practitionersList = async (req, res, next) => {
       offset: page ? (page - 1) * limit : 0,
       limit: limit ? limit : 10,
     });
+    
     const practitionersData = [];
     for (let index = 0; index < rows.length; index++) {
       const practitioner = rows[index];
@@ -642,7 +681,7 @@ const logout = async (req, res) => {
   });
 };
 
-/**
+/** 
  * Refresh token will update the new token and refresh tokens in session table
  */
 const refreshTokenAPI = async (req, res, next) => {
@@ -738,8 +777,6 @@ const changeStatus = async (req, res, next) => {
 };
 
 module.exports = {
-  register,
-  getAllAdmins,
   login,
   forgotPassword,
   changePassword,
@@ -751,7 +788,9 @@ module.exports = {
   refreshTokenAPI,
   editPractitioner,
   changeStatus,
+  getAllAdmins,
+  adminAdd,
+  getAdminDetails,
   editAdmin,
   deleteAdmin,
-  getAdminDetails
 };

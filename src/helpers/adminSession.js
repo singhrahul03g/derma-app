@@ -80,13 +80,16 @@ const findAndCreateSessionWithID = async (id, type) => {
  * Update access and refresh token with id and type
  *  inisde session table
  */
+
 const updateSessionWithID = async (id, token, refreshJWTToken, type) => {
   try {
+    
     const adminData = await Admin.findOne({
       where: {
         id
       },
     });
+
     if (adminData) {
       const adminUpdatedSessionData = await Session.update(
         {
