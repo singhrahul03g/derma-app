@@ -127,6 +127,7 @@ const getAllAdmins = async (req, res, next) => {
     };
 
     res.status(200).json({ result: admins, pageData });
+    
 } catch (e) {
     console.error(e);
     res.status(500).send(e);
@@ -158,35 +159,79 @@ const editAdmin = async (req, res, next) => {
   const uniqueId = req.params.uniqueId
   const adminDetails = req.body
 
-  try {
-    const admin = await Admin.findOne({ where: { uniqueId: uniqueId } });
+  if( adminDetails && adminDetails.password){
+    const salt = await bcrypt.genSalt(parseInt(saltRounds));
+    const hashedPassword = await bcrypt.hash(adminDetails.password, salt);
+    adminDetails.password =  hashedPassword ;
 
-    if (admin === null) {
-      console.log('Not found!');
-    } else {
-      console.log(admin instanceof Admin); // true
-      console.log(admin, "admin");
+    try {
+      const admin = await Admin.findOne({ where: { uniqueId: uniqueId } });
+  
+      if (admin === null) {
+        console.log('Not found!');
+      } else {
+        console.log(admin instanceof Admin); // true
+        console.log(admin, "admin");
+      }
+  
+  
+  
+      admin.set({
+        ...admin,
+        ...adminDetails
+      });
+  
+  
+      await admin.save();
+  
+      res.send({
+        "result": 'admin updated successfully'
+      })
+    } catch (err) {
+  
+      console.log(err, "err");
+      res.send({
+        "error": err
+      })
+  
     }
 
-    admin.set({
-      ...admin,
-      ...adminDetails
-    });
 
-
-    await admin.save();
-
-    res.send({
-      "result": 'admin updated successfully'
-    })
-  } catch (err) {
-
-    console.log(err, "err");
-    res.send({
-      "error": err
-    })
-
+  }else{
+    try {
+      const admin = await Admin.findOne({ where: { uniqueId: uniqueId } });
+  
+      if (admin === null) {
+        console.log('Not found!');
+      } else {
+        console.log(admin instanceof Admin); // true
+        console.log(admin, "admin");
+      }
+  
+  
+  
+      admin.set({
+        ...admin,
+        ...adminDetails
+      });
+  
+  
+      await admin.save();
+  
+      res.send({
+        "result": 'admin updated successfully'
+      })
+    } catch (err) {
+  
+      console.log(err, "err");
+      res.send({
+        "error": err
+      })
+  
+    }
   }
+
+ 
 }
 
 const deleteAdmin = async (req, res, next) => {
@@ -429,9 +474,12 @@ const resetPassword = async (req, res, next) => {
 };
 
 // Add Practitioner
-const addPractitioner = async (req, res, next) => {
+
+const addDoctor= async (req, res, next) => {
+
   let { firstName, lastName, phoneNumber, email, countryCode, address } =
     req.body;
+
   let adminData = req.user;
   let fullName = `${firstName}${!lastName ? "" : " " + lastName}`;
   let practitioner = {
@@ -524,7 +572,7 @@ const addPractitioner = async (req, res, next) => {
 };
 
 // Practitioner List
-const practitionersList = async (req, res, next) => {
+const doctorsList = async (req, res, next) => {
   try {
     const { searchText, status, createdAt, sortName, sort, limit, page } = req.body;
     let { id } = req.user;
@@ -636,7 +684,7 @@ const practitionersList = async (req, res, next) => {
   }
 };
 // Delete practitioner
-const deletePractitioner = async (req, res, next) => {
+const deleteDoctor = async (req, res, next) => {
   const { uniqueId } = req.body;
   try {
     const users = await User.findOne({
@@ -684,6 +732,7 @@ const logout = async (req, res) => {
 /** 
  * Refresh token will update the new token and refresh tokens in session table
  */
+
 const refreshTokenAPI = async (req, res, next) => {
   let { id, uniqueId, name, email, roleName } = req.user;
   let refreshToken = req.refreshToken;
@@ -710,7 +759,7 @@ const refreshTokenAPI = async (req, res, next) => {
 /**
  * Edit practitioner
  */
-const editPractitioner = async (req, res, next) => {
+const updateDoctor = async (req, res, next) => {
   let { uniqueId } = req.params;
   let { firstName, lastName, countryCode, phoneNumber, address } = req.body;
   try {
@@ -764,7 +813,7 @@ const changeStatus = async (req, res, next) => {
       return res
         .status(200)
         .json({
-          message: `Practitioner is ${status === 0 ? "deactivated" : "actived"
+          message: `Practitioner is ${status === 0 ? "deactivated" : "activated"
             }.`,
         });
     }
@@ -776,21 +825,22 @@ const changeStatus = async (req, res, next) => {
   }
 };
 
+
 module.exports = {
   login,
   forgotPassword,
   changePassword,
   resetPassword,
-  addPractitioner,
-  practitionersList,
-  deletePractitioner,
+  addDoctor,
+  doctorsList,
+  deleteDoctor,
   logout,
   refreshTokenAPI,
-  editPractitioner,
+  updateDoctor,
   changeStatus,
   getAllAdmins,
   adminAdd,
   getAdminDetails,
   editAdmin,
-  deleteAdmin,
+  deleteAdmin
 };
