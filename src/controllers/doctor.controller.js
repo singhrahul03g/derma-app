@@ -1,4 +1,3 @@
-
 const bcrypt = require("bcrypt");
 const path = require("path");
 const { Op } = require("sequelize");
@@ -6,7 +5,11 @@ const _ = require("lodash");
 const errorHandler = require("../helpers/errorHandler");
 const { db, sequelize } = require("../config/dbConnection");
 const { generateToken, refreshToken } = require("../helpers/jwtToken");
-const { mailDetails, sendMail, transporter } = require("../helpers/emailTransporter");
+const {
+  mailDetails,
+  sendMail,
+  transporter,
+} = require("../helpers/emailTransporter");
 const {
   findAndCreateSessionWithID,
   updateSessionWithID,
@@ -62,7 +65,6 @@ const register = async (req, res, next) => {
       const token = generateToken({ id, name, email });
 
       if (token.length !== 0) {
-
         console.log("INSIDE TOKEN IF STATEMENT");
         const emailTransporter = transporter();
 
@@ -77,7 +79,6 @@ const register = async (req, res, next) => {
           try {
             await transporter().sendMail(mailDetails);
             console.log("Email has been sent.....");
-
           } catch (error) {
             console.log(error);
             console.log("INSIDE CATCH SENDMAIL STATEMENT");
@@ -85,18 +86,22 @@ const register = async (req, res, next) => {
         };
 
         sendMail(mailData);
-
       }
       return res.json({
         status: 200,
         msg: "Token generated succesfully.",
-        token
+        token,
       });
     })
     .catch((err) => {
-      console.log(err)
+      console.log(err);
       if (!err.errors) {
-        return next(errorHandler(500, "Server internal error. Please try after some time."));
+        return next(
+          errorHandler(
+            500,
+            "Server internal error. Please try after some time."
+          )
+        );
       } else {
         return err.errors.forEach((err) => {
           next(errorHandler(400, err.message));
@@ -108,42 +113,32 @@ const register = async (req, res, next) => {
 // fetch list of doctors
 
 const getAllDoctors = async (req, res, next) => {
-
   const doctors = await Doctor.findAll();
-  res.json({ result: doctors })
-
-}
+  res.json({ result: doctors });
+};
 
 const getDoctorDetails = async (req, res, next) => {
-
-  
-  const uniqueId = req.params.uniqueId
-try{
-  const doctor = await Doctor.findOne({
-    where:{
-      uniqueId
-    }
-  })
-
-  res.json({ result: doctor })
-
-}catch(err){
-  console.log(err,"err")
-}
-
-}
-
+  const uniqueId = req.params.uniqueId;
+  try {
+    const doctor = await Doctor.findOne({
+      where: {
+        uniqueId,
+      },
+    });
+    res.json({ result: doctor });
+  } catch (err) {
+    console.log(err, "err");
+  }
+};
 
 const editDoctor = async (req, res, next) => {
-
-  const uniqueId = req.params.uniqueId
-  const doctorDetails = req.body
-
+  const uniqueId = req.params.uniqueId;
+  const doctorDetails = req.body;
   try {
     const doctor = await Doctor.findOne({ where: { uniqueId } });
 
     if (doctor === null) {
-      console.log('Not found!');
+      console.log("Not found!");
     } else {
       console.log(doctor instanceof Doctor); // true
       console.log(doctor, "doctor");
@@ -151,48 +146,42 @@ const editDoctor = async (req, res, next) => {
 
     doctor.set({
       ...doctor,
-      ...doctorDetails
+      ...doctorDetails,
     });
-
 
     await doctor.save();
 
     res.send({
-      "result": 'doctor updated successfully'
-    })
+      result: "doctor updated successfully",
+    });
   } catch (err) {
-
     console.log(err, "err");
     res.send({
-      "error": err
-    })
-
+      error: err,
+    });
   }
-}
+};
 
 const deleteDoctor = async (req, res, next) => {
+  const uniqueId = req.params.uniqueId;
+  console.log(uniqueId, "uniqueid");
 
-  const uniqueId = req.params.uniqueId
-  console.log(uniqueId,"uniqueid")
- 
   const doctor = await Doctor.findOne({ where: { uniqueId } });
-  console.log(doctor,"gbxhjbh")
+  console.log(doctor, "gbxhjbh");
 
   try {
-    await doctor.destroy()
+    await doctor.destroy();
 
     res.send({
-      result: "deleted doctor"
-    })
+      result: "deleted doctor",
+    });
   } catch (err) {
-    console.log(err, "err")
+    console.log(err, "err");
   }
-}
-
+};
 
 // Login of doctor
 const login = async (req, res, next) => {
-
   const { email, password } = req.body;
 
   if (typeof email === "undefined" || typeof password === "undefined") {
@@ -214,7 +203,6 @@ const login = async (req, res, next) => {
     const dbData = doctor.dataValues;
     bcrypt.compare(password, dbData.password, async (error, response) => {
       if (response) {
-
         const { id, uniqueId, name, email, role } = dbData;
         console.log(dbData, "dbdat6a");
         const roleName = role.dataValues.name;
@@ -478,7 +466,12 @@ const addPractitioner = async (req, res, next) => {
       // console.log("Error");
       // console.log(err);
       if (!err.errors) {
-        return next(errorHandler(500, "Server internal error. Please try after some time."));
+        return next(
+          errorHandler(
+            500,
+            "Server internal error. Please try after some time."
+          )
+        );
       } else {
         return err.errors.forEach((err) => {
           next(errorHandler(400, err.message));
@@ -490,7 +483,8 @@ const addPractitioner = async (req, res, next) => {
 // Practitioner List
 const practitionersList = async (req, res, next) => {
   try {
-    const { searchText, status, createdAt, sortName, sort, limit, page } = req.body;
+    const { searchText, status, createdAt, sortName, sort, limit, page } =
+      req.body;
     let { id } = req.user;
     let searchBy = {};
     let columnName = sortName ? sortName : "createdAt";
@@ -499,44 +493,44 @@ const practitionersList = async (req, res, next) => {
       searchBy[Op.or] = [
         {
           firstName: {
-            [Op.like]: sequelize.fn('LOWER', `%${searchText.toLowerCase()}%`),
+            [Op.like]: sequelize.fn("LOWER", `%${searchText.toLowerCase()}%`),
           },
         },
         {
           lastName: {
-            [Op.like]: sequelize.fn('LOWER', `%${searchText.toLowerCase()}%`),
+            [Op.like]: sequelize.fn("LOWER", `%${searchText.toLowerCase()}%`),
           },
         },
         {
           fullName: {
-            [Op.like]: sequelize.fn('LOWER', `%${searchText.toLowerCase()}%`),
+            [Op.like]: sequelize.fn("LOWER", `%${searchText.toLowerCase()}%`),
           },
         },
         {
           email: {
-            [Op.like]: sequelize.fn('LOWER', `%${searchText.toLowerCase()}%`),
+            [Op.like]: sequelize.fn("LOWER", `%${searchText.toLowerCase()}%`),
           },
         },
         {
           address: {
-            [Op.like]: sequelize.fn('LOWER', `%${searchText.toLowerCase()}%`),
+            [Op.like]: sequelize.fn("LOWER", `%${searchText.toLowerCase()}%`),
           },
         },
-      ]
+      ];
     }
     if (status !== undefined && status !== "") {
       searchBy.status = {
-        [Op.eq]: status
-      }
+        [Op.eq]: status,
+      };
     }
     if (createdAt !== undefined && createdAt !== "") {
       searchBy.createdAt = {
-        [Op.lte]: new Date(createdAt)
-      }
+        [Op.lte]: new Date(createdAt),
+      };
     }
     searchBy.doctorId = {
-      [Op.eq]: id
-    }
+      [Op.eq]: id,
+    };
     const { count, rows } = await User.findAndCountAll({
       where: searchBy,
       include: [Roles, Doctor],
@@ -588,7 +582,9 @@ const practitionersList = async (req, res, next) => {
   } catch (err) {
     // console.log(err);
     if (!err.errors) {
-      return next(errorHandler(500, "Server internal error. Please try after some time."));
+      return next(
+        errorHandler(500, "Server internal error. Please try after some time.")
+      );
     } else {
       let errMsg;
       for (let index = 0; index < err.errors.length; index++) {
@@ -604,12 +600,12 @@ const deletePractitioner = async (req, res, next) => {
   try {
     const users = await User.findOne({
       where: {
-        uniqueId
-      }
+        uniqueId,
+      },
     });
     if (users) {
       const userUpdate = await users.update({
-        uniqueId: `${users.id} is deleted`
+        uniqueId: `${users.id} is deleted`,
       });
       const userDesotry = await users.destroy();
       return res.status(200).json({
@@ -622,7 +618,9 @@ const deletePractitioner = async (req, res, next) => {
     }
   } catch (err) {
     if (!err.errors) {
-      return next(errorHandler(500, "Server internal error. Please try after some time."));
+      return next(
+        errorHandler(500, "Server internal error. Please try after some time.")
+      );
     } else {
       return err.errors.forEach((err) => {
         next(errorHandler(400, err.message));
@@ -661,7 +659,9 @@ const refreshTokenAPI = async (req, res, next) => {
     });
   } catch (err) {
     if (!err.errors) {
-      return next(errorHandler(500, "Server internal error. Please try after some time."));
+      return next(
+        errorHandler(500, "Server internal error. Please try after some time.")
+      );
     } else {
       return err.errors.forEach((err) => {
         next(errorHandler(400, err.message));
@@ -695,7 +695,9 @@ const editPractitioner = async (req, res, next) => {
   } catch (err) {
     // console.log(err);
     if (!err.errors) {
-      return next(errorHandler(500, "Server internal error. Please try after some time."));
+      return next(
+        errorHandler(500, "Server internal error. Please try after some time.")
+      );
     } else {
       return err.errors.forEach((err) => {
         next(errorHandler(400, err.message));
@@ -724,12 +726,9 @@ const changeStatus = async (req, res, next) => {
     if (statusData !== null) {
       await statusData.update({ status });
 
-      return res
-        .status(200)
-        .json({
-          message: `Practitioner is ${status === 0 ? "deactivated" : "actived"
-            }.`,
-        });
+      return res.status(200).json({
+        message: `Practitioner is ${status === 0 ? "deactivated" : "actived"}.`,
+      });
     }
     return res.status(404).json({ message: `Practitioner is not found.` });
   } catch (err) {
@@ -755,5 +754,5 @@ module.exports = {
   changeStatus,
   editDoctor,
   deleteDoctor,
-  getDoctorDetails
+  getDoctorDetails,
 };

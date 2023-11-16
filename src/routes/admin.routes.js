@@ -1,3 +1,4 @@
+
 // admin routes
 
 const router = require('express').Router();
@@ -30,7 +31,5 @@ router.post('/change-status/:uniqueId', auth, adminController.changeStatus);
 router.get('/refresh-token', refreshAuth, adminController.refreshTokenAPI);
 
 // doctor account updates by admin
-
-
 
 module.exports = router;
